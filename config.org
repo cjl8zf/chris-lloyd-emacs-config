@@ -752,6 +752,8 @@ possible otherwise split vertically.
 
 ** Writing
 *** Spell-check
+I use flyspell together with a nice [[https://emacs.stackexchange.com/questions/14909/how-to-use-flyspell-to-efficiently-correct-previous-word][function]] by Mark Karpov that
+opens the suggestion in a pop-up menu.
 #+begin_src emacs-lisp
   (use-package flyspell
       :config
