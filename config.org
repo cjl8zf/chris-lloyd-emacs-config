@@ -676,8 +676,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 
   (use-package paredit)
 #+END_SRC
-#+BEGIN_SRC emacs-lisp
 **** Keybindings
+#+BEGIN_SRC emacs-lisp
   (my-leader-def 'emacs-lisp-mode-map
     "e b" 'eval-buffer)
 #+END_SRC
