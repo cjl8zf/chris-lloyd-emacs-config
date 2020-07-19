@@ -1,0 +1,871 @@
+#+setupfile: https://raw.githubusercontent.com/fniessen/org-html-themes/master/setup/theme-readtheorg.setup
+* Chris Lloyd's Emacs Configuration
+** Package Management
+Setup package management.
+#+begin_src emacs-lisp
+  (require 'package)
+  (setq package-enable-at-startup nil)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (require 'use-package)
+
+  (setq use-package-always-ensure t)
+#+end_src
+** Theme
+Here we change the basic look and feel. 
+
+#+begin_src emacs-lisp
+  (setq inhibit-splash-screen t
+        initial-scratch-message nil)
+
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+  (add-to-list 'default-frame-alist '(fullscreen . fullheight))
+
+  (setq mouse-wheel-scroll-amount '(2 ((shift) . 2)))
+  (setq mouse-wheel-progressive-speed nil)
+  (setq mouse-wheel-follow-mouse 't)
+  (setq scroll-step 1)
+
+  (global-set-key [mouse-3]
+    `(menu-item ,(purecopy "Menu Bar") ignore
+      :filter (lambda (_)
+  	      (if (zerop (or (frame-parameter nil 'menu-bar-lines) 0))
+  		  (mouse-menu-bar-map)
+  		(mouse-menu-major-mode-map)))))
+
+  (set-face-attribute 'default nil :height 180)
+
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+
+  (use-package sublime-themes
+  	     :init (progn (load-theme 'spolsky t)))
+
+  (use-package modern-fringes)
+
+  ;; ensure that files openned from operating system open a buffer in
+  ;; currently running emacs, and not in a new window
+  (setq ns-pop-up-frames nil)
+
+  ;; make shell commands work on OS X
+  (use-package exec-path-from-shell
+  	     :config (when (memq window-system '(mac ns))
+  		       (exec-path-from-shell-initialize)))
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  (setq confirm-kill-emacs 'yes-or-no-p)
+
+  ;; update buffer when file changes on disk
+  (global-auto-revert-mode t)
+
+  (use-package smart-mode-line
+   :ensure t
+   :config
+   (setq sml/theme 'dark)
+   (setq rm-blacklist '(" Undo-Tree"
+  		      " ivy"
+  		      " counsel"
+  		      " yas"
+  		      " SP"
+  		      " WK"
+  		      " ElDoc"
+  		      " Fly"
+  		      " EvilOrg"
+  		      " s-/"))
+   (sml/setup))
+#+end_src
+
+** General Settings
+*** Customs File
+When changing a variable through customize-variable dialog save these
+changes in the custom.el instead of appending them to the end of the
+init file.
+#+begin_src emacs-lisp
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+#+end_src
+
+*** Backups
+Set the emacs backup to stop cluttering folders with backup files.
+#+begin_src emacs-lisp
+  (setq backup-directory-alist `(("." . "~/.emacs_backups")))
+  (setq backup-by-copying t)
+  (setq delete-old-versions t
+    kept-new-versions 6
+    kept-old-versions 2
+    version-control t)
+  (setq vc-make-backup-files t)
+#+end_src
+
+** UI
+*** Recentf
+Builds a list of the recently opened files.
+#+begin_src emacs-lisp
+
+  (use-package recentf
+    :config
+    (setq recentf-max-saved-items nil))
+#+end_src
+
+*** Ivy
+
+#+begin_src emacs-lisp
+
+  (use-package ivy
+    :ensure t
+    :config
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) "))
+
+  (use-package avy
+    :ensure t)
+
+  (use-package ace-window
+    :ensure t
+    :config
+    (global-set-key (kbd "M-o") 'ace-window)
+    :init
+    (setq aw-dispatch-always t))
+
+  (winner-mode)
+
+  (use-package counsel
+    :ensure t
+    :config
+    (counsel-mode 1))
+
+  (use-package which-key
+    :ensure t
+    :config
+    (which-key-mode 1))
+
+  (use-package swiper
+    :ensure t
+    :config)
+
+  (use-package ace-popup-menu
+    :ensure t
+    :config
+    (ace-popup-menu-mode 1))
+#+end_src
+
+*** Window Management Setup
+When working with really long lines it is useful to be able to center
+yourself horizontally on the line. For me this mainly occurs in large
+tikz-diagrams, where I disabled wrapping. This function is from [[https://stackoverflow.com/questions/1249497/command-to-center-screen-horizontally-around-cursor-on-emacs][here]].
+#+BEGIN_SRC emacs-lisp
+  ;; from here
+  (defun my-horizontal-recenter ()
+    "Make the point horizontally centered in the window."
+    (interactive)
+    (let ((mid (/ (window-width) 2))
+  	(line-len (save-excursion (end-of-line) (current-column)))
+  	(cur (current-column)))
+      (if (< mid cur)
+  	(set-window-hscroll (selected-window)
+  			    (- cur mid)))))
+#+END_SRC
+
+#+begin_src emacs-lisp
+  (split-window-horizontally)
+  (split-window-horizontally)
+  (balance-windows)
+#+end_src
+*** Evil
+#+begin_src emacs-lisp
+   (use-package evil
+     :config
+     (setq evil-want-visual-char-semi-exclusive t)
+     (setq evil-want-fine-undo t)
+     (evil-mode 1))
+
+   (use-package evil-smartparens)
+
+   (use-package evil-magit)
+
+  (use-package evil-org
+     :ensure t
+     :after org
+     :config
+     (add-hook 'org-mode-hook 'evil-org-mode)
+     (add-hook 'evil-org-mode-hook
+  	     (lambda ()
+  	       (evil-org-set-key-theme)))
+     (require 'evil-org-agenda)
+     (evil-org-agenda-set-keys))
+
+     (use-package evil-commentary
+     :config
+     (evil-commentary-mode))
+
+     (use-package evil-args
+       :init
+       (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+       (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
+
+    (use-package key-chord
+      :config
+      (key-chord-mode 1)
+      (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
+      (key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
+      (key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
+
+    (use-package evil-matchit)
+#+end_src
+*** Surrounds
+#+BEGIN_SRC emacs-lisp
+   (use-package smartparens-config
+  	      :ensure smartparens
+  	      :config
+  	      (setq sp-max-pair-length 20)
+  	      (sp-pair "\\left\\langle" "\\right\\rangle")
+  	      (sp-pair "\\left(" "\\right)")
+  	      (sp-pair "\\left\\{" "\\right\\}")
+  	      (sp-pair "|" "|")
+  	      (sp-pair "\\left|" "\\right|")
+  	      (sp-pair "\\left\\langle" "\\right\\rangle")
+  	      (sp-pair "\\left\\lceil" "\\right\\rceil")
+  	      (sp-pair "\\left\\lfloor" "\\right\\rfloor")
+  	      (smartparens-global-mode 1))
+
+   (use-package evil-surround
+     :ensure t
+     :config
+     (global-evil-surround-mode 1)
+   (evil-add-to-alist
+    'evil-surround-pairs-alist
+    ?\( '("(" . ")")
+    ?\[ '("[" . "]")
+    ?\{ '("{" . "}")
+    ?\) '("( " . " )")
+    ?\] '("[ " . " ]")
+    ?\} '("{ " . " }")))
+
+   (use-package embrace
+    :ensure t
+    :config
+    (add-hook 'LaTeX-mode-hook (lambda ()
+  			       (message "test")
+      (embrace-add-pair ?e "\\begin{" "}")
+      (embrace-add-pair ?a "\\begin{align*}\n" "\n\\end{align*}")
+      (embrace-add-pair ?m "\\(" "\\)")
+      (embrace-add-pair ?M "\\[" "\\]")
+      (embrace-add-pair ?l "\\left\(" "\\right\)")
+      (defun embrace-with-command ()
+      (let ((fname (read-string "Command: ")))
+  	(cons (format "\\%s{" (or fname "")) "}")))
+      (embrace-add-pair-regexp ?c "\\\\\\w+?{" "}" 'embrace-with-command
+  			     (embrace-build-help "\\command{" "}")))))
+			     
+    (use-package evil-embrace
+     :init
+     (evil-embrace-enable-evil-surround-integration)
+     (setq evil-embrace-show-help-p nil))
+#+END_SRC
+
+*** Global Keybindings
+
+#+begin_src emacs-lisp
+  (use-package general)
+
+  (general-define-key
+     :keymaps 'normal
+     "z =" 'mk-flyspell-correct-previous
+     "z \\" 'powerthesaurus-lookup-word-at-point
+     "z Z" 'my-horizontal-recenter
+     "g o" 'my-goto-defn-split
+     "g a" 'evil-forward-arg
+     "g A" 'evil-backward-arg
+     "<deletechar>" '(lambda () (interactive) (switch-to-buffer-other-window "*Sage*")))
+
+   (general-create-definer my-leader-def
+     :states '(normal emacs visual)
+     :prefix "SPC")
+
+   (my-leader-def
+     "m" 'magit-status
+     "q"   'kill-my-goto-defn-buffer
+     "y"   'counsel-yank-pop
+     "b b" 'switch-to-buffer
+     "b o" 'switch-to-buffer-other-window
+     "b k" 'kill-current-buffer
+     "w w" 'ace-window
+     "w o" 'other-window
+     "w 1" 'delete-other-windows
+     "w k" 'delete-window
+     "w s" 'split-window-vertically
+     "w v" 'split-window-horizontally
+     "w S" 'ace-swap-window
+     "w <left>" 'shrink-window-horizontally
+     "w <right>" 'enlarge-window-horizontally
+     "w <down>" 'shrink-window
+     "w <up>" 'enlarge-window
+     "w b" 'balance-windows
+     "w u" 'winner-undo
+     "w r" 'winner-redo
+     "j" 'avy-goto-char
+     "l" 'avy-goto-line
+     "f f" 'counsel-find-file
+     "f r" 'counsel-recentf
+     "f s" 'save-buffer
+     "f S" 'write-file
+     "x" 'counsel-M-x
+     "h k" 'describe-key
+     "h f" 'describe-function
+     "h m" 'describe-mode
+     "h v" 'describe-variable
+     ":" 'eval-expression
+     "s f" 'sp-slurp-hybrid-sexp
+     "s b" 'sp-forward-barf-sexp
+     "s F" 'sp-backward-slurp-sexp
+     "s B" 'sp-backward-barf-sexp
+     "/" 'swiper
+     "d" 'helm-dash-at-point
+     "D" 'helm-dash)
+
+   (general-define-key
+    :keymaps 'mu4e-headers-mode-map
+    "j" 'evil-next-line
+    "k" 'evil-previous-line)
+
+   (general-define-key
+    :keymaps 'ivy-mode-map
+    "C-j" 'ivy-next-line
+    "C-k" 'ivy-previous-line)
+
+   (general-define-key
+    :states '(normal emacs)
+    :keymaps '(sage-shell-mode-map gap-process-map)
+    "SPC p" 'counsel-shell-history)
+#+end_src
+** Major Modes
+*** LaTeX
+**** Setup
+#+begin_src emacs-lisp
+  (use-package tex
+    :ensure auctex
+    :init
+    (add-hook 'LaTeX-mode-hook (lambda () (flycheck-select-checker 'tex-chktex)))
+    ()
+    (setq TeX-auto-save t)
+    (setq TeX-parse-self t)
+    (setq-default TeX-master nil)
+
+    ;; (add-hook 'LaTeX-mode-hook (lambda ()
+    ;; 			       (push
+    ;; 				'("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+    ;; 				  :help "Run Latexmk on file")
+    ;; 				TeX-command-list)))
+    ;; (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+    ;; (setq TeX-view-program-list
+    ;;     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -g %n %o %b")))
+
+    ;; (add-hook 'LaTeX-mode-hook 'server-start);
+
+    ;; (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
+    (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+    (setq reftex-plug-into-AUCTeX t)
+    (setq flycheck-tex-chktex-executable "/Library/TeX/texbin/chktex")
+    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+    ;; https://tex.stackexchange.com/questions/69555/i-want-to-disable-auto-fill-mode-when-editing-equations
+      (defvar my-LaTeX-no-autofill-environments
+      '("equation" "equation*" "align*" "tikzcd")
+      "A list of LaTeX environment names in which `auto-fill-mode' should be inhibited.")
+
+      (defun my-LaTeX-auto-fill-function ()
+      "This function checks whether point is currently inside one of
+      the LaTeX environments listed in
+      `my-LaTeX-no-autofill-environments'. If so, it inhibits automatic
+      filling of the current paragraph."
+      (let ((do-auto-fill t)
+  	    (current-environment "")
+  	    (level 0))
+  	(while (and do-auto-fill (not (string= current-environment "document")))
+  	(setq level (1+ level)
+  		current-environment (LaTeX-current-environment level)
+  		do-auto-fill (not (member current-environment my-LaTeX-no-autofill-environments))))
+  	(when do-auto-fill
+  	(do-auto-fill))))
+
+      (defun my-LaTeX-setup-auto-fill ()
+      "This function turns on auto-fill-mode and sets the function
+      used to fill a paragraph to `my-LaTeX-auto-fill-function'."
+      (auto-fill-mode)
+      (setq auto-fill-function 'my-LaTeX-auto-fill-function))
+
+      (add-hook 'LaTeX-mode-hook 'my-LaTeX-setup-auto-fill))
+
+  (defun my-latex-evil-create-environment ()
+    "Create environment and enter insert mode."
+    (interactive)
+    (progn
+      (call-interactively 'LaTeX-environment)
+      (call-interactively 'evil-insert)))
+
+  (defun my-latex-evil-modify-current-environment ()
+    "Change current environment."
+    (interactive)
+    (let ((current-prefix-arg 4))
+      (call-interactively #'LaTeX-environment)))
+
+  (defun my-latex-insert-inline-math()
+    "Insert \(\)."
+      (interactive)
+    (progn (insert "\\(\\)")
+  	 (evil-backward-char)
+  	 (call-interactively 'evil-insert)))
+
+  (defun my-latex-insert-display-math()
+    "Insert \[\]."
+      (interactive)
+      (progn
+        (if (not (string= (thing-at-point 'line t) "\n"))
+        (call-interactively 'evil-open-below))
+        (insert "\\[\\]")
+        (evil-backward-char)
+        (call-interactively 'evil-insert)))
+#+end_src
+**** Keybindings
+#+begin_src emacs-lisp
+
+  (my-leader-def 'LaTeX-mode-map
+    "c" 'TeX-command-master
+    "v v" 'preview-buffer
+    "v c" 'preview-clearout
+    "t" 'TeX-next-error
+     "e e" 'my-latex-evil-create-environment
+     "e m" 'my-latex-evil-modify-current-environment
+     "e c" 'LaTeX-close-environment
+     "r" 'ivy-bibtex-with-local-bibliography)
+#+end_src
+**** Bibtex
+#+begin_src emacs-lisp
+  (use-package ivy-bibtex
+     :config
+     (setq ivy-re-builders-alist
+         '((ivy-bibtex . ivy--regex-ignore-order)
+  	 (t . ivy--regex-plus))))
+
+   (setq ivy-bibtex-default-action 'ivy-bibtex-insert-citation)
+
+   (use-package gscholar-bibtex)
+#+end_src
+**** PDF View
+#+begin_src emacs-lisp
+  (use-package pdf-tools
+    :config
+    (pdf-tools-install)
+    (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+        TeX-source-correlate-start-server t)
+    (add-hook 'TeX-after-compilation-finished-functions
+        #'TeX-revert-document-buffer))
+#+end_src
+
+*** Sage
+**** Setup
+#+begin_src emacs-lisp
+  (use-package sage-shell-mode
+      :init
+      (setq sage-shell:sage-root "/Applications/SageMath2/"))
+
+  (defun send-to-sage-and-switch ()
+      "Send buffer to sage and switch to sage buffer."
+      (interactive)
+      (progn
+      (caill-interactively 'sage-shell-edit:send-buffer)
+      (call-interactively 'other-window)))
+#+end_src
+**** Keybindings
+#+begin_src emacs-lisp
+  (my-leader-def 'sage-shell:sage-mode-map 
+      "c" 'sage-shell-edit:send-buffer)
+#+end_src
+
+*** Gap
+**** Setup
+#+begin_src emacs-lisp
+  (use-package gap-mode
+       :init
+       (setq gap-executable "/Applications/gap/bin/gap.sh"))
+#+end_src
+**** Keybindings
+#+begin_src emacs-lisp
+  (my-leader-def 'gap-mode-map
+    "c" 'gap-eval-file)
+#+end_src
+*** Haskell
+**** Setup
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+    :ensure t
+    :init
+    (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+    (add-hook 'haskell-mode-hook 'haskell-indent-mode)
+     (with-eval-after-load "haskell-mode"
+      ;; This changes the evil "O" and "o" keys for haskell-mode to make sure that
+      ;; indentation is done correctly. See
+      ;; https://github.com/haskell/haskell-mode/issues/1265#issuecomment-252492026.
+      (defun haskell-evil-open-above ()
+        (interactive)
+        (evil-digit-argument-or-evil-beginning-of-line)
+        (haskell-indentation-newline-and-indent)
+        (evil-previous-line)
+        (haskell-indentation-indent-line)
+        (evil-append-line nil))
+
+      (defun haskell-evil-open-below ()
+        (interactive)
+        (evil-append-line nil)
+        (haskell-indentation-newline-and-indent))
+#+end_src
+**** Keybindings
+#+begin_src emacs-lisp
+  (evil-define-key 'normal haskell-mode-map
+     "o" 'haskell-evil-open-below
+     "O" 'haskell-evil-open-above)))
+#+end_src
+*** Org
+
+
+#+begin_src emacs-lisp
+  (use-package org
+    :ensure t
+    :init
+    (define-key global-map "\C-cl" 'org-store-link)
+    (define-key global-map "\C-ca" 'org-agenda)
+    (bind-key* "C-c c" 'org-capture)
+    (setq org-capture-templates
+  	'(("t" "Todo" entry (file "~/org/refile.org")
+  	   "* TODO %?\n" )
+  	  ("c" "Clocked Todo" entry (file "~/org/refile.org")
+  	   "* TODO %?\n" :clock-in t :clock-keep t)))
+    (setq org-agenda-files '("~/org"))
+    ;; 12 hour clock
+    (setq org-agenda-timegrid-use-ampm 1)
+    (setq org-refile-targets (quote ((nil :maxlevel . 9)
+  				 (org-agenda-files :maxlevel . 9))))
+    ;; hide file names in agenda view
+    (setq org-agenda-prefix-format "%t %s")
+    (setq org-reverse-note-order t)
+    (setq org-clock-persist 'history)
+    (org-clock-persistence-insinuate)
+    (add-hook 'org-mode-hook #'smartparens-mode)
+    (eval-after-load 'org
+      '(setf org-highlight-latex-and-related '(latex)))
+    (add-hook 'org-mode-hook 'flyspell-mode)
+    (add-hook 'org-mode-hook 'turn-on-auto-fill)
+    (setq org-modules (cons 'org-habit org-modules))
+    (setq org-latex-create-formula-image-program 'imagemagick)
+    (setq org-tags-column -90)
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+    :config
+    (with-eval-after-load 'ox-latex
+      (add-to-list 'org-latex-classes '("draft" "\\documentclass[11pt,draft]{book}"
+    ("\\chapter{%s}" . "\\chapter*{%s}")
+  	      ("\\section{%s}" . "\\section*{%s}")
+  	      ("\\subsection{%s}" . "\\subsection*{%s}")
+  	      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+  	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+  	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+      (add-to-list 'org-latex-classes '("semesternotes" "\\documentclass[11pt]{book}"
+  	      ("\\part{%s}" . "\\part*{%s}")
+  	      ("\\chapter{%s}" . "\\chapter*{%s}")
+  	      ("\\section{%s}" . "\\section*{%s}")
+  	      ("%% %s" . "%% %s")
+  	      ("%% %s" . "%% %s")
+  	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+  	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+      (add-to-list 'org-latex-classes '("drill" "\\documentclass[11pt]{book}"
+  	      ("\\section{%s}" . "\\section*{%s}")
+  	      ("%% %s" . "%% %s")
+  	      ("\\begin{thm}{%s}" "\\end{thm}" "\\begin{thm}{%s}" "\\end{thm}")
+  	      ("\\begin{proof}{%s}" "\\end{proof}" "\\begin{proof}{%s}" "\\end{proof}"))))
+
+  	      ;; ("\\begin{defn}{%s}" "\\end{defn}" "\\begin{defn}{%s}" "\\end{defn}")
+    (setq org-catch-invisible-edits 'error)
+    (setq org-ctrl-k-protect-subtree t)
+    :bind* (("C-c C-x o" . org-clock-out)))
+
+  ;; (use-package org-mru-clock
+  ;;   :config
+  ;;     (setq org-mru-clock-completing-read #'ivy-completing-read))
+  ;; (use-package cl)
+  (use-package org-drill
+    :ensure org-plus-contrib
+    :config
+    (setq org-drill-add-random-noise-to-intervals-p t))
+
+  ;; (use-package ox-latex
+  ;;   :ensure org-plus-contrib)
+  (defun my-org-hide-current-body ()
+    "Hide body of current heading and go to heading."
+    (interactive)
+    (progn
+      (call-interactively 'org-previous-visible-heading)
+      (call-interactively 'org-cycle)))
+
+  (defun my-evil-org-insert-heading-after ()
+    "Insert org heading after current heading and go into insert mode."
+    (interactive)
+    (progn
+      (call-interactively 'org-insert-heading-after-current)
+      (call-interactively 'evil-insert)))
+
+  (defun my-evil-org-insert-heading-before ()
+    "Insert org heading above current heading and go into insert mode."
+    (interactive)
+    (progn
+      (call-interactively 'beginning-of-line)
+      (call-interactively 'org-insert-heading)
+      (call-interactively 'evil-insert)))
+
+  (defun my-evil-org-insert-subheading ()
+    "Create org subheading and enter insert mode."
+    (interactive)
+    (progn
+      (call-interactively 'end-of-line)
+      (call-interactively 'org-insert-subheading)
+      (call-interactively 'evil-insert)))
+#+end_src
+**** Keybindings
+#+begin_src emacs-lisp
+  (my-leader-def 'org-mode-map
+    "<RET>" 'evil-org-org-insert-heading-respect-content-below
+    "t" 'org-todo
+    "T" 'org-set-tags
+    ;; "rf" 'org-refile
+    "o" 'my-evil-org-insert-heading-after
+    "O" 'my-evil-org-insert-heading-before
+    "." 'my-evil-org-insert-subheading
+    "p" 'org-toggle-latex-fragment
+    "m" 'my-latex-insert-inline-math
+    "M" 'my-latex-insert-display-math
+    "rr" 'org-roam
+    "rf" 'org-roam-find-file
+    "rb" 'org-roam-switch-to-buffer
+    "rg" 'org-roam-graph-show
+    "ri" 'org-roam-insert)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-map
+   "g k"  'org-backward-heading-same-level
+   "g j"  'org-forward-heading-same-level
+   "g h" 'outline-up-heading
+   "g l" 'outline-next-visible-heading
+   "g J" 'my-org-hide-current-body)
+#+end_src
+*** Elisp
+**** Setup
+#+begin_src emacs-lisp
+  ;; (use-package lispy)
+    ;; (use-package evil-lispy
+    ;;   :init
+    ;;  (add-hook 'emacs-lisp-mode-hook #'evil-lispy-mode))
+    ;; (use-package lispyville
+    ;;   :init
+    ;;   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
+
+  (use-package paredit)
+#+end_src
+#+BEGIN_SRC emacs-lisp
+**** Keybindings
+  (my-leader-def 'emacs-lisp-mode-map
+    "e b" 'eval-buffer)
+#+END_SRC
+
+** Documentation
+We will use helm together with helm-dash to view documentation in
+emacs.
+#+begin_src emacs-lisp
+  (use-package helm)
+  (use-package helm-dash)
+#+end_src
+We want documentation for my commonly used languages.
+#+begin_src emacs-lisp
+  (setq helm-dash-common-docsets '("Python 2" "Haskell" "Sage" "Emacs Lisp"))
+#+end_src
+We will display the documentation in the eww web-browser in emacs.
+
+We set the font to match the rest of emacs instead of the font
+provided from html. We also force the browser to pop up on the left if
+possible otherwise split vertically.
+#+begin_src emacs-lisp
+  (setq helm-dash-browser-func 'eww-browse-url)
+
+  (add-hook 'eww-mode-hook 'eww-toggle-fonts)
+
+  (defun eww-display+ (buf _alist)
+    (let ((w (or
+  	       (window-in-direction 'left)
+  	       (split-window-vertically))))
+      (set-window-buffer w buf)
+      w))
+
+  (push `(,(rx "*eww*")
+  	(eww-display+))
+        display-buffer-alist)
+#+end_src
+
+** Completions
+*** Yasnippet
+#+begin_src emacs-lisp
+  (use-package yasnippet
+      :ensure t
+      :init
+      (yas-global-mode 1)
+      (defun my-org-latex-yas ()
+      "Activate org and LaTeX yas expansion in org-mode buffers."
+      (yas-minor-mode)
+      (yas-activate-extra-mode 'latex-mode))
+
+      (add-hook 'org-mode-hook #'my-org-latex-yas))
+
+
+    (use-package yasnippet-snippets
+      :ensure t)
+#+end_src
+
+*** Hippie Expand
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-/") 'hippie-expand)
+  (setq hippie-expand-try-functions-list
+        '(try-expand-dabbrev
+  	try-expand-dabbrev-all-buffers
+  	try-expand-dabbrev-from-kill
+  	try-complete-file-name-partially
+  	try-complete-file-name
+  	try-expand-all-abbrevs
+  	try-expand-list
+  	try-expand-line
+  	try-complete-lisp-symbol-partially
+  	try-complete-lisp-symbol))
+#+end_src
+
+** Writing
+*** Spell-check
+#+begin_src emacs-lisp
+  (use-package flyspell
+      :config
+      (setq ispell-program-name "/opt/local/bin/aspell")
+      (flyspell-mode 1)
+      (defun mk-flyspell-correct-previous (&optional words)
+      "Correct word before point, reach distant words.
+
+      WORDS words at maximum are traversed backward until misspelled
+      word is found.  If it's not found, give up.  If argument WORDS is
+      not specified, traverse 12 words by default.
+
+      Return T if misspelled word is found and NIL otherwise.  Never
+      move point."
+      (interactive "P")
+      (let* ((delta (- (point-max) (point)))
+  	   (counter (string-to-number (or words "12")))
+  	   (result
+  	    (catch 'result
+  	      (while (>= counter 0)
+  		(when (cl-some #'flyspell-overlay-p
+  			       (overlays-at (point)))
+  		  (flyspell-correct-word-before-point)
+  		  (throw 'result t))
+  		(backward-word 1)
+  		(setq counter (1- counter))
+  		nil))))
+        (goto-char (- (point-max) delta))
+        result))
+      (bind-key* "M-c" 'mk-flyspell-correct-previous))
+
+  (use-package powerthesaurus)
+#+end_src
+
+*** Grammar-check
+#+begin_src emacs-lisp
+  (use-package langtool
+    :config
+    (setq langtool-java-bin "/usr/bin/java")
+    (setq langtool-language-tool-jar "/Applications/LanguageTool-4.2/languagetool-commandline.jar"))
+#+end_src
+** Project Management
+#+begin_src emacs-lisp
+  (use-package magit)
+
+  (use-package skeletor
+      :config
+      (skeletor-define-template "latex-skeleton"
+        :title "latex-skeleton"
+        :no-license? t)
+      (skeletor-define-template "beamer-skeleton"
+        :title "beamer-skeleton"
+        :no-license? t)
+      (skeletor-define-template "classwork-skeleton"
+        :title "classwork-skeleton"
+        :no-license? t))
+#+end_src
+
+** Remote Work
+I have a laptop I use as a server for running
+computations. There is a cron job that writes the IP address of the laptop to
+a file in Dropbox. These functions allow easy access to that computer.
+#+begin_src emacs-lisp
+  (use-package ssh)
+
+    (defun connect-lenovo ()
+      "Open dired into lenovo"
+      (interactive)
+      (dired (concat "/ssh:chris@" (lenovo-ip) ":/home/")))
+
+    (defun ssh-lenovo ()
+      "SSH into lenovo."
+      (interactive)
+      (ssh (concat "chris@" (lenovo-ip))))
+
+    (defun lenovo-ip ()
+        "Return ip for lenovo."
+        (substring (get-string-from-file "~/DropBox/lenovo_ip.txt") 0 -1))
+
+    (defun get-string-from-file (filePath)
+      "Return filePath's file content."
+      (with-temp-buffer
+        (insert-file-contents filePath)
+        (buffer-string)))
+#+end_src
+
+** Programming
+*** Syntax
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :init
+    (global-flycheck-mode)
+    (flycheck-define-checker proselint
+    "A linter for prose."
+    :command ("proselint" source-inplace)
+    :error-patterns
+    ((warning line-start (file-name) ":" line ":" column ": "
+  	    (id (one-or-more (not (any " "))))
+  	    (message) line-end))
+    :modes (text-mode markdown-mode latex-mode))
+
+    (add-to-list 'flycheck-checkers 'proselint))
+#+END_SRC
+*** Ctags
+#+BEGIN_SRC emacs-lisp
+  (use-package ctags-update)
+#+END_SRC
+
+** Telemetry
+#+begin_src emacs-lisp
+  (use-package interaction-log)
+
+  (use-package keyfreq
+    :init
+    (keyfreq-mode 1)
+    (keyfreq-autosave-mode 1))
+#+end_src
