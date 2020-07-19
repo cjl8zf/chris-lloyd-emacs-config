@@ -665,17 +665,17 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 #+end_src
 *** Elisp
 **** Setup
-#+begin_src emacs-lisp
-  ;; (use-package lispy)
-    ;; (use-package evil-lispy
-    ;;   :init
-    ;;  (add-hook 'emacs-lisp-mode-hook #'evil-lispy-mode))
-    ;; (use-package lispyville
-    ;;   :init
-    ;;   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
+#+BEGIN_SRC emacs-lisp
+  (use-package lispy)
+  (use-package evil-lispy
+      :init
+     (add-hook 'emacs-lisp-mode-hook #'evil-lispy-mode))
+  (use-package lispyville
+      :init
+      (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
 
   (use-package paredit)
-#+end_src
+#+END_SRC
 #+BEGIN_SRC emacs-lisp
 **** Keybindings
   (my-leader-def 'emacs-lisp-mode-map
