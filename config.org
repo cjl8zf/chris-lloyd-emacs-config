@@ -287,7 +287,6 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 
    (my-leader-def
      "m" 'magit-status
-     "q"   'kill-my-goto-defn-buffer
      "y"   'counsel-yank-pop
      "b b" 'switch-to-buffer
      "b o" 'switch-to-buffer-other-window
