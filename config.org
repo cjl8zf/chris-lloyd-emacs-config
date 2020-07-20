@@ -19,7 +19,6 @@ Setup package management.
 #+end_src
 ** Theme
 Here we change the basic look and feel. 
-
 #+begin_src emacs-lisp
   (setq inhibit-splash-screen t
         initial-scratch-message nil)
@@ -115,7 +114,6 @@ Builds a list of the recently opened files.
 #+end_src
 
 *** Ivy
-
 #+begin_src emacs-lisp
 
   (use-package ivy
@@ -130,12 +128,8 @@ Builds a list of the recently opened files.
 
   (use-package ace-window
     :ensure t
-    :config
-    (global-set-key (kbd "M-o") 'ace-window)
     :init
     (setq aw-dispatch-always t))
-
-  (winner-mode)
 
   (use-package counsel
     :ensure t
@@ -162,7 +156,8 @@ When working with really long lines it is useful to be able to center
 yourself horizontally on the line. For me this mainly occurs in large
 tikz-diagrams, where I disabled wrapping. This function is from [[https://stackoverflow.com/questions/1249497/command-to-center-screen-horizontally-around-cursor-on-emacs][here]].
 #+BEGIN_SRC emacs-lisp
-  ;; from here
+  (winner-mode)
+
   (defun my-horizontal-recenter ()
     "Make the point horizontally centered in the window."
     (interactive)
@@ -181,42 +176,42 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 #+end_src
 *** Evil
 #+begin_src emacs-lisp
-   (use-package evil
-     :config
-     (setq evil-want-visual-char-semi-exclusive t)
-     (setq evil-want-fine-undo t)
-     (evil-mode 1))
+    (use-package evil
+	:config
+	(setq evil-want-visual-char-semi-exclusive t)
+	(setq evil-want-fine-undo t)
+	(evil-mode 1))
 
-   (use-package evil-smartparens)
+    (use-package evil-smartparens)
 
-   (use-package evil-magit)
+    (use-package evil-magit)
 
-  (use-package evil-org
-     :ensure t
-     :after org
-     :config
-     (add-hook 'org-mode-hook 'evil-org-mode)
-     (add-hook 'evil-org-mode-hook
-  	     (lambda ()
-  	       (evil-org-set-key-theme)))
-     (require 'evil-org-agenda)
-     (evil-org-agenda-set-keys))
+    (use-package evil-org
+	:ensure t
+	:after org
+	:config
+	(add-hook 'org-mode-hook 'evil-org-mode)
+	(add-hook 'evil-org-mode-hook
+		(lambda ()
+		(evil-org-set-key-theme)))
+	(require 'evil-org-agenda)
+	(evil-org-agenda-set-keys))
 
-     (use-package evil-commentary
-     :config
-     (evil-commentary-mode))
+    (use-package evil-commentary
+	:config
+	(evil-commentary-mode))
 
-     (use-package evil-args
-       :init
-       (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-       (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
+    (use-package evil-args
+	:init
+	(define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+	(define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
 
     (use-package key-chord
-      :config
-      (key-chord-mode 1)
-      (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
-      (key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
-      (key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
+	:config
+	(key-chord-mode 1)
+	(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
+	(key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
+	(key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
 
     (use-package evil-matchit)
 #+end_src
