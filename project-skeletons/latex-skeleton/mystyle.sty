@@ -1,0 +1,51 @@
+\ProvidesPackage{mystyle}
+\usepackage{amsmath, amsthm, amsfonts, amssymb, latexsym}
+\usepackage[margin=1in]{geometry}
+\usepackage[charter]{mathdesign}
+
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{float}
+\usepackage{multicol}
+\usepackage{enumitem}
+
+\newtheorem{defn}{Definition}
+\newtheorem{ex}{Example}
+\newtheorem{thm}{Theorem}
+\newtheorem{prop}{Prop}
+\newtheorem{lemma}{Lemma}
+
+\newtheorem*{defn*}{Definition}
+\newtheorem*{ex*}{Example}
+\newtheorem*{thm*}{Theorem}
+\newtheorem*{prop*}{Prop}
+\newtheorem*{lemma*}{Lemma}
+
+\newcommand{\N}{{\mathbb{N}}}
+\newcommand{\F}{{\mathbb{F}}} 
+\newcommand{\Z}{{\mathbb{Z}}} 
+\newcommand{\Q}{{\mathbb{Q}}} 
+\newcommand{\R}{{\mathbb{R}}} 
+\newcommand{\C}{{\mathbb{C}}} 
+
+\newcommand{\Top}{\text{Top}}
+\newcommand{\GTop}{G\text{Top}}
+\newcommand{\RP}{\R P}
+\newcommand{\CP}{\C P}
+
+\newcommand{\cupproduct}{\smile}
+\newcommand{\smashproduct}{\wedge}
+
+\DeclareMathOperator{\Hom}{\text{Hom}}
+\DeclareMathOperator{\Aut}{\text{Aut}}
+\DeclareMathOperator{\Map}{\text{Map}}
+\DeclareMathOperator{\Sq}{\text{Sq}}
+\DeclareMathOperator{\im}{\text{im}}
+\DeclareMathOperator{\coker}{\text{coker}}
+
+\renewcommand{\implies}{\mathrel{\Longrightarrow}}
+\renewcommand{\impliedby}{\mathrel{\Longleftarrow}}
+
+\newenvironment{solution}
+  {\renewcommand{\qedsymbol}{}\begin{proof}[Solution]}
+  {\end{proof}}
