@@ -477,6 +477,14 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
       (caill-interactively 'sage-shell-edit:send-buffer)
       (call-interactively 'other-window)))
 #+end_src
+**** Generate Ctags
+#+BEGIN_SRC emacs-lisp
+(defun generate-sage-tags ()
+"Generate a tags file for all *.sage files in current directory."
+(interactive)
+(shell-command "find . -name \"*.sage\" -print | etags -l \"python\" -"))
+#+END_SRC
+ 
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'sage-shell:sage-mode-map 
