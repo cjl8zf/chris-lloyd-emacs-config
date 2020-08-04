@@ -295,9 +295,9 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      "w o" 'other-window
      "w 1" 'delete-other-windows
      "w k" 'delete-window
-     "w s" 'split-window-vertically
+     "w h" 'split-window-vertically
      "w v" 'split-window-horizontally
-     "w S" 'ace-swap-window
+     "w s" 'ace-swap-window
      "w <left>" 'shrink-window-horizontally
      "w <right>" 'enlarge-window-horizontally
      "w <down>" 'shrink-window
@@ -322,8 +322,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      "s F" 'sp-backward-slurp-sexp
      "s B" 'sp-backward-barf-sexp
      "/" 'swiper
-     "d" 'helm-dash-at-point
-     "D" 'helm-dash)
+     "d" 'counsel-dash-at-point
+     "D" 'counsel-dash)
 
    (general-define-key
     :keymaps 'mu4e-headers-mode-map
@@ -340,6 +340,9 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     :keymaps '(sage-shell-mode-map gap-process-map)
     "SPC p" 'counsel-shell-history)
 #+end_src
+
+#+RESULTS:
+
 ** Major Modes
 *** LaTeX
 **** Setup
@@ -605,6 +608,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     :config
     (setq org-drill-add-random-noise-to-intervals-p t))
 
+  (use-package org-edit-latex)
+
   ;; (use-package ox-latex
   ;;   :ensure org-plus-contrib)
   (defun my-org-hide-current-body ()
@@ -640,9 +645,9 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'org-mode-map
-    "<RET>" 'evil-org-org-insert-heading-respect-content-below
-    "t" 'org-todo
-    "T" 'org-set-tags
+    "<RET>" 'my-evil-org-insert-subheading
+    "T" 'org-todo
+    "t" 'counsel-org-tag
     ;; "rf" 'org-refile
     "o" 'my-evil-org-insert-heading-after
     "O" 'my-evil-org-insert-heading-before
@@ -690,10 +695,11 @@ emacs.
 #+begin_src emacs-lisp
   (use-package helm)
   (use-package helm-dash)
+  (use-package counsel-dash)
 #+end_src
 We want documentation for my commonly used languages.
 #+begin_src emacs-lisp
-  (setq helm-dash-common-docsets '("Python 2" "Haskell" "Sage" "Emacs Lisp"))
+  (setq helm-dash-common-docsets '("LaTeX" "Python 2" "Haskell" "Sage" "Emacs Lisp"))
 #+end_src
 We will display the documentation in the eww web-browser in emacs.
 
