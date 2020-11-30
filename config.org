@@ -1,4 +1,3 @@
-#+setupfile: https://raw.githubusercontent.com/fniessen/org-html-themes/master/setup/theme-readtheorg.setup
 * Chris Lloyd's Emacs Configuration
 ** Package Management
 Setup package management.
@@ -248,7 +247,6 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     :ensure t
     :config
     (add-hook 'LaTeX-mode-hook (lambda ()
-  			       (message "test")
       (embrace-add-pair ?e "\\begin{" "}")
       (embrace-add-pair ?a "\\begin{align*}\n" "\n\\end{align*}")
       (embrace-add-pair ?m "\\(" "\\)")
@@ -283,6 +281,7 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 
    (general-create-definer my-leader-def
      :states '(normal emacs visual)
+     :keymaps '(global magit-mode-map)
      :prefix "SPC")
 
    (my-leader-def
@@ -305,7 +304,7 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      "w b" 'balance-windows
      "w u" 'winner-undo
      "w r" 'winner-redo
-     "j" 'avy-goto-char
+     "<SPC>" 'avy-goto-char
      "l" 'avy-goto-line
      "f f" 'counsel-find-file
      "f r" 'counsel-recentf
@@ -365,7 +364,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     ;; (setq TeX-view-program-list
     ;;     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -g %n %o %b")))
 
-    ;; (add-hook 'LaTeX-mode-hook 'server-start);
+    (add-hook 'LaTeX-mode-hook 'server-start)
+    (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
 
     ;; (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
@@ -383,14 +383,14 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
       `my-LaTeX-no-autofill-environments'. If so, it inhibits automatic
       filling of the current paragraph."
       (let ((do-auto-fill t)
-  	    (current-environment "")
-  	    (level 0))
-  	(while (and do-auto-fill (not (string= current-environment "document")))
-  	(setq level (1+ level)
-  		current-environment (LaTeX-current-environment level)
-  		do-auto-fill (not (member current-environment my-LaTeX-no-autofill-environments))))
-  	(when do-auto-fill
-  	(do-auto-fill))))
+	    (current-environment "")
+	    (level 0))
+	(while (and do-auto-fill (not (string= current-environment "document")))
+	(setq level (1+ level)
+		current-environment (LaTeX-current-environment level)
+		do-auto-fill (not (member current-environment my-LaTeX-no-autofill-environments))))
+	(when do-auto-fill
+	(do-auto-fill))))
 
       (defun my-LaTeX-setup-auto-fill ()
       "This function turns on auto-fill-mode and sets the function
@@ -417,19 +417,23 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     "Insert \(\)."
       (interactive)
     (progn (insert "\\(\\)")
-  	 (evil-backward-char)
-  	 (call-interactively 'evil-insert)))
+	 (evil-backward-char)
+	 (call-interactively 'evil-insert)))
 
   (defun my-latex-insert-display-math()
     "Insert \[\]."
       (interactive)
       (progn
-        (if (not (string= (thing-at-point 'line t) "\n"))
-        (call-interactively 'evil-open-below))
-        (insert "\\[\\]")
-        (evil-backward-char)
-        (call-interactively 'evil-insert)))
+	(if (not (string= (thing-at-point 'line t) "\n"))
+	(call-interactively 'evil-open-below))
+	(insert "\\[\\]")
+	(evil-backward-char)
+	(call-interactively 'evil-insert)))
 #+end_src
+
+#+RESULTS:
+: my-latex-insert-display-math
+
 **** Keybindings
 #+begin_src emacs-lisp
 
@@ -536,6 +540,11 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
   (evil-define-key 'normal haskell-mode-map
      "o" 'haskell-evil-open-below
      "O" 'haskell-evil-open-above)))
+     
+  (my-leader-def 'haskell-mode-map 
+      "c" 'haskell-process-load-file)
+  (my-leader-def 'haskell-error-mode-map
+  "q" 'quit-window) 
 #+end_src
 *** Org
 
@@ -649,6 +658,7 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
     "T" 'org-todo
     "t" 'counsel-org-tag
     ;; "rf" 'org-refile
+    "e" 'org-export-dispatch
     "o" 'my-evil-org-insert-heading-after
     "O" 'my-evil-org-insert-heading-before
     "." 'my-evil-org-insert-subheading
@@ -699,7 +709,8 @@ emacs.
 #+end_src
 We want documentation for my commonly used languages.
 #+begin_src emacs-lisp
-  (setq helm-dash-common-docsets '("LaTeX" "Python 2" "Haskell" "Sage" "Emacs Lisp"))
+  (setq helm-dash-common-docsets '("Python 2" "Haskell" ;; "Sage"
+				   "Emacs Lisp"))
 #+end_src
 We will display the documentation in the eww web-browser in emacs.
 
@@ -741,7 +752,7 @@ possible otherwise split vertically.
     (use-package yasnippet-snippets
       :ensure t)
 #+end_src
-
+[]
 *** Hippie Expand
 #+begin_src emacs-lisp
   (global-set-key (kbd "M-/") 'hippie-expand)
@@ -817,8 +828,16 @@ opens the suggestion in a pop-up menu.
         :no-license? t)
       (skeletor-define-template "classwork-skeleton"
         :title "classwork-skeleton"
-        :no-license? t))
+        :no-license? t)
+      (skeletor-define-template "coverletter-skeleton"
+        :title "coverletter-skeleton"
+        :no-license? t)
+)
+	
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Remote Work
 I have a laptop I use as a server for running
