@@ -431,8 +431,30 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 	(call-interactively 'evil-insert)))
 #+end_src
 
-#+RESULTS:
-: my-latex-insert-display-math
+This function searches the current LaTeX project for all the labels
+and then lets you insert one using the completion framework of your
+choice (in my case it uses ivy). This is based on the reftex function
+goto-label.
+
+#+begin_src emacs-lisp 
+(defun my-ref-label (&optional other-window)
+  "Prompt for a label (with completion) and insert a reference to it."
+  (interactive "P")
+  (reftex-access-scan-info)
+  (let* ((docstruct (symbol-value reftex-docstruct-symbol))
+	 ;; If point is inside a \ref{} or \pageref{}, use that as
+	 ;; default value.
+	 (default (when (looking-back "\\\\\\(?:page\\)?ref{[-a-zA-Z0-9_*.:]*"
+                                      (line-beginning-position))
+		    (reftex-this-word "-a-zA-Z0-9_*.:")))
+         (label (completing-read (if default
+				     (format "Label (default %s): " default)
+				   "Label: ")
+				 docstruct
+                                 (lambda (x) (stringp (car x))) t nil nil
+				 default)))
+    (insert (concat "\\ref{" label "}"))))
+#+end_src
 
 **** Keybindings
 #+begin_src emacs-lisp
@@ -445,8 +467,10 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      "e e" 'my-latex-evil-create-environment
      "e m" 'my-latex-evil-modify-current-environment
      "e c" 'LaTeX-close-environment
-     "r" 'ivy-bibtex-with-local-bibliography)
+     "r r" 'ivy-bibtex-with-local-bibliography
+     "r l" 'my-ref-label)
 #+end_src
+
 **** Bibtex
 #+begin_src emacs-lisp
   (use-package ivy-bibtex
@@ -651,6 +675,34 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
       (call-interactively 'org-insert-subheading)
       (call-interactively 'evil-insert)))
 #+end_src
+
+#+begin_src emacs-lisp
+(use-package org-roam
+      :ensure t
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "~/org/")
+      (server-start)
+      (require 'org-protocol)
+      (require 'org-roam-protocol))
+
+(use-package org-roam-server
+  :ensure t
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20))
+#+end_src
+
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'org-mode-map
@@ -755,11 +807,41 @@ possible otherwise split vertically.
 []
 *** Hippie Expand
 #+begin_src emacs-lisp
+(global-set-key (kbd "M-/") 'hippie-expand)
+
+;; https://blog.binchen.org/posts/autocomplete-with-a-dictionary-with-hippie-expand.html
+;; The actual expansion function
+(defun try-expand-by-dict (old)
+  ;; old is true if we have already attempted an expansion
+  (unless (bound-and-true-p ispell-minor-mode)
+    (ispell-minor-mode 1))
+
+  ;; english-words.txt is the fallback dicitonary
+  (if (not ispell-alternate-dictionary)
+      (setq ispell-alternate-dictionary (file-truename "~/.emacs.d/misc/english-words.txt")))
+  (let ((lookup-func (if (fboundp 'ispell-lookup-words)
+                       'ispell-lookup-words
+                       'lookup-words)))
+    (unless old
+      (he-init-string (he-lisp-symbol-beg) (point))
+      (if (not (he-string-member he-search-string he-tried-table))
+        (setq he-tried-table (cons he-search-string he-tried-table)))
+      (setq he-expand-list
+            (and (not (equal he-search-string ""))
+                 (funcall lookup-func (concat (buffer-substring-no-properties (he-lisp-symbol-beg) (point)) "*")))))
+    (if (null he-expand-list)
+      (if old (he-reset-string))
+      (he-substitute-string (car he-expand-list))
+      (setq he-expand-list (cdr he-expand-list))
+      t)
+    ))
+
   (global-set-key (kbd "M-/") 'hippie-expand)
   (setq hippie-expand-try-functions-list
         '(try-expand-dabbrev
   	try-expand-dabbrev-all-buffers
   	try-expand-dabbrev-from-kill
+	try-expand-by-dict 
   	try-complete-file-name-partially
   	try-complete-file-name
   	try-expand-all-abbrevs
@@ -816,7 +898,9 @@ opens the suggestion in a pop-up menu.
 #+end_src
 ** Project Management
 #+begin_src emacs-lisp
-  (use-package magit)
+  (use-package magit
+  :init
+  (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
 
   (use-package skeletor
       :config
@@ -835,9 +919,6 @@ opens the suggestion in a pop-up menu.
 )
 	
 #+end_src
-
-#+RESULTS:
-: t
 
 ** Remote Work
 I have a laptop I use as a server for running
