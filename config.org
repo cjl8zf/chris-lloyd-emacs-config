@@ -210,6 +210,7 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 	(key-chord-mode 1)
 	(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
 	(key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
+	(key-chord-define evil-lispy-mode-map  "jk" 'evil-normal-state)
 	(key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
 
     (use-package evil-matchit)
