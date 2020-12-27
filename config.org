@@ -16,11 +16,15 @@ Setup package management.
 
   (setq use-package-always-ensure t)
 #+end_src
+
+#+RESULTS:
+: t
+
 ** Theme
 Here we change the basic look and feel. 
 #+begin_src emacs-lisp
   (setq inhibit-splash-screen t
-        initial-scratch-message nil)
+	initial-scratch-message nil)
 
   (add-to-list 'initial-frame-alist '(fullscreen . maximized))
   (add-to-list 'default-frame-alist '(fullscreen . fullheight))
@@ -33,9 +37,9 @@ Here we change the basic look and feel.
   (global-set-key [mouse-3]
     `(menu-item ,(purecopy "Menu Bar") ignore
       :filter (lambda (_)
-  	      (if (zerop (or (frame-parameter nil 'menu-bar-lines) 0))
-  		  (mouse-menu-bar-map)
-  		(mouse-menu-major-mode-map)))))
+	      (if (zerop (or (frame-parameter nil 'menu-bar-lines) 0))
+		  (mouse-menu-bar-map)
+		(mouse-menu-major-mode-map)))))
 
   (set-face-attribute 'default nil :height 180)
 
@@ -43,7 +47,7 @@ Here we change the basic look and feel.
   (tool-bar-mode -1)
 
   (use-package sublime-themes
-  	     :init (progn (load-theme 'spolsky t)))
+	     :init (progn (load-theme 'spolsky t)))
 
   (use-package modern-fringes)
 
@@ -53,8 +57,8 @@ Here we change the basic look and feel.
 
   ;; make shell commands work on OS X
   (use-package exec-path-from-shell
-  	     :config (when (memq window-system '(mac ns))
-  		       (exec-path-from-shell-initialize)))
+	     :config (when (memq window-system '(mac ns))
+		       (exec-path-from-shell-initialize)))
 
   (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -68,17 +72,20 @@ Here we change the basic look and feel.
    :config
    (setq sml/theme 'dark)
    (setq rm-blacklist '(" Undo-Tree"
-  		      " ivy"
-  		      " counsel"
-  		      " yas"
-  		      " SP"
-  		      " WK"
-  		      " ElDoc"
-  		      " Fly"
-  		      " EvilOrg"
-  		      " s-/"))
-   (sml/setup))
+		      " ivy"
+		      " counsel"
+		      " yas"
+		      " SP"
+		      " WK"
+		      " ElDoc"
+		      " Fly"
+		      " EvilOrg"
+		      " s-/"))
+   (add-hook 'after-init-hook 'sml/setup))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** General Settings
 *** Customs File
@@ -89,6 +96,9 @@ init file.
   (setq custom-file "~/.emacs.d/custom.el")
   (load custom-file)
 #+end_src
+
+#+RESULTS:
+: t
 
 *** Backups
 Set the emacs backup to stop cluttering folders with backup files.
@@ -102,6 +112,9 @@ Set the emacs backup to stop cluttering folders with backup files.
   (setq vc-make-backup-files t)
 #+end_src
 
+#+RESULTS:
+: t
+
 ** UI
 *** Recentf
 Builds a list of the recently opened files.
@@ -111,6 +124,9 @@ Builds a list of the recently opened files.
     :config
     (setq recentf-max-saved-items nil))
 #+end_src
+
+#+RESULTS:
+: t
 
 *** Ivy
 #+begin_src emacs-lisp
@@ -135,6 +151,8 @@ Builds a list of the recently opened files.
     :config
     (counsel-mode 1))
 
+  (use-package ace-link)
+
   (use-package which-key
     :ensure t
     :config
@@ -149,6 +167,12 @@ Builds a list of the recently opened files.
     :config
     (ace-popup-menu-mode 1))
 #+end_src
+
+#+RESULTS:
+: t
+
+
+*** 
 
 *** Window Management Setup
 When working with really long lines it is useful to be able to center
@@ -168,53 +192,64 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
   			    (- cur mid)))))
 #+END_SRC
 
+#+RESULTS:
+: my-horizontal-recenter
+
 #+begin_src emacs-lisp
   (split-window-horizontally)
   (split-window-horizontally)
   (balance-windows)
 #+end_src
+
+#+RESULTS:
+: t
+
 *** Evil
 #+begin_src emacs-lisp
-    (use-package evil
-	:config
-	(setq evil-want-visual-char-semi-exclusive t)
-	(setq evil-want-fine-undo t)
-	(evil-mode 1))
+  (use-package evil
+      :config
+      (setq evil-want-visual-char-semi-exclusive t)
+      (setq evil-want-fine-undo t)
+      (global-undo-tree-mode)
+      (evil-mode 1))
 
-    (use-package evil-smartparens)
+  (use-package evil-smartparens)
 
-    (use-package evil-magit)
+  (use-package evil-magit)
 
-    (use-package evil-org
-	:ensure t
-	:after org
-	:config
-	(add-hook 'org-mode-hook 'evil-org-mode)
-	(add-hook 'evil-org-mode-hook
-		(lambda ()
-		(evil-org-set-key-theme)))
-	(require 'evil-org-agenda)
-	(evil-org-agenda-set-keys))
+  (use-package evil-org
+      :ensure t
+      :after org
+      :config
+      (add-hook 'org-mode-hook 'evil-org-mode)
+      ;; (add-hook 'evil-org-mode-hook
+      ;; 	    (lambda ()
+      ;; 	    (evil-org-set-key-theme)))
+      (require 'evil-org-agenda)
+      (evil-org-agenda-set-keys))
 
-    (use-package evil-commentary
-	:config
-	(evil-commentary-mode))
+  (use-package evil-commentary
+      :config
+      (evil-commentary-mode))
 
-    (use-package evil-args
-	:init
-	(define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-	(define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
+  (use-package evil-args
+      :init
+      (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+      (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
 
-    (use-package key-chord
-	:config
-	(key-chord-mode 1)
-	(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
-	(key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
-	(key-chord-define evil-lispy-mode-map  "jk" 'evil-normal-state)
-	(key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
+  (use-package key-chord
+      :config
+      (key-chord-mode 1)
+      (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
+      (key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
+      (key-chord-define evil-lispy-mode-map  "jk" 'evil-normal-state)
+      (key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
 
-    (use-package evil-matchit)
+  (use-package evil-matchit)
 #+end_src
+
+#+RESULTS:
+
 *** Surrounds
 #+BEGIN_SRC emacs-lisp
    (use-package smartparens-config
@@ -264,6 +299,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      (evil-embrace-enable-evil-surround-integration)
      (setq evil-embrace-show-help-p nil))
 #+END_SRC
+
+#+RESULTS:
 
 *** Global Keybindings
 
@@ -321,14 +358,9 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
      "s b" 'sp-forward-barf-sexp
      "s F" 'sp-backward-slurp-sexp
      "s B" 'sp-backward-barf-sexp
-     "/" 'swiper
+     "/" 'swiper-all
      "d" 'counsel-dash-at-point
      "D" 'counsel-dash)
-
-   (general-define-key
-    :keymaps 'mu4e-headers-mode-map
-    "j" 'evil-next-line
-    "k" 'evil-previous-line)
 
    (general-define-key
     :keymaps 'ivy-mode-map
@@ -342,6 +374,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 #+end_src
 
 #+RESULTS:
+
+*** 
 
 ** Major Modes
 *** LaTeX
@@ -432,6 +466,9 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 	(call-interactively 'evil-insert)))
 #+end_src
 
+#+RESULTS:
+: my-latex-insert-display-math
+
 This function searches the current LaTeX project for all the labels
 and then lets you insert one using the completion framework of your
 choice (in my case it uses ivy). This is based on the reftex function
@@ -457,6 +494,9 @@ goto-label.
     (insert (concat "\\ref{" label "}"))))
 #+end_src
 
+#+RESULTS:
+: my-ref-label
+
 **** Keybindings
 #+begin_src emacs-lisp
 
@@ -472,6 +512,8 @@ goto-label.
      "r l" 'my-ref-label)
 #+end_src
 
+#+RESULTS:
+
 **** Bibtex
 #+begin_src emacs-lisp
   (use-package ivy-bibtex
@@ -484,6 +526,9 @@ goto-label.
 
    (use-package gscholar-bibtex)
 #+end_src
+
+#+RESULTS:
+
 **** PDF View
 #+begin_src emacs-lisp
   (use-package pdf-tools
@@ -494,6 +539,9 @@ goto-label.
     (add-hook 'TeX-after-compilation-finished-functions
         #'TeX-revert-document-buffer))
 #+end_src
+
+#+RESULTS:
+: t
 
 *** Sage
 **** Setup
@@ -509,6 +557,10 @@ goto-label.
       (caill-interactively 'sage-shell-edit:send-buffer)
       (call-interactively 'other-window)))
 #+end_src
+
+#+RESULTS:
+: send-to-sage-and-switch
+
 **** Generate Ctags
 #+BEGIN_SRC emacs-lisp
 (defun generate-sage-tags ()
@@ -516,12 +568,17 @@ goto-label.
 (interactive)
 (shell-command "find . -name \"*.sage\" -print | etags -l \"python\" -"))
 #+END_SRC
+
+#+RESULTS:
+: generate-sage-tags
  
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'sage-shell:sage-mode-map 
       "c" 'sage-shell-edit:send-buffer)
 #+end_src
+
+#+RESULTS:
 
 *** Gap
 **** Setup
@@ -530,11 +587,17 @@ goto-label.
        :init
        (setq gap-executable "/Applications/gap/bin/gap.sh"))
 #+end_src
+
+#+RESULTS:
+
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'gap-mode-map
     "c" 'gap-eval-file)
 #+end_src
+
+#+RESULTS:
+
 *** Haskell
 **** Setup
 #+begin_src emacs-lisp
@@ -558,19 +621,25 @@ goto-label.
       (defun haskell-evil-open-below ()
         (interactive)
         (evil-append-line nil)
-        (haskell-indentation-newline-and-indent))
+        (haskell-indentation-newline-and-indent))))
 #+end_src
+
+#+RESULTS:
+
 **** Keybindings
 #+begin_src emacs-lisp
   (evil-define-key 'normal haskell-mode-map
      "o" 'haskell-evil-open-below
-     "O" 'haskell-evil-open-above)))
+     "O" 'haskell-evil-open-above)
      
   (my-leader-def 'haskell-mode-map 
       "c" 'haskell-process-load-file)
   (my-leader-def 'haskell-error-mode-map
   "q" 'quit-window) 
 #+end_src
+
+#+RESULTS:
+
 *** Org
 
 
@@ -581,16 +650,17 @@ goto-label.
     (define-key global-map "\C-cl" 'org-store-link)
     (define-key global-map "\C-ca" 'org-agenda)
     (bind-key* "C-c c" 'org-capture)
+    (setq org-hide-emphasis-markers 't)
     (setq org-capture-templates
-  	'(("t" "Todo" entry (file "~/org/refile.org")
-  	   "* TODO %?\n" )
-  	  ("c" "Clocked Todo" entry (file "~/org/refile.org")
-  	   "* TODO %?\n" :clock-in t :clock-keep t)))
+	'(("t" "Todo" entry (file "~/org/refile.org")
+	   "* TODO %?\n" )
+	  ("c" "Clocked Todo" entry (file "~/org/refile.org")
+	   "* TODO %?\n" :clock-in t :clock-keep t)))
     (setq org-agenda-files '("~/org"))
     ;; 12 hour clock
     (setq org-agenda-timegrid-use-ampm 1)
     (setq org-refile-targets (quote ((nil :maxlevel . 9)
-  				 (org-agenda-files :maxlevel . 9))))
+				 (org-agenda-files :maxlevel . 9))))
     ;; hide file names in agenda view
     (setq org-agenda-prefix-format "%t %s")
     (setq org-reverse-note-order t)
@@ -601,7 +671,7 @@ goto-label.
       '(setf org-highlight-latex-and-related '(latex)))
     (add-hook 'org-mode-hook 'flyspell-mode)
     (add-hook 'org-mode-hook 'turn-on-auto-fill)
-    (setq org-modules (cons 'org-habit org-modules))
+    ;; (setq org-modules (cons 'org-habit org-modules))
     (setq org-latex-create-formula-image-program 'imagemagick)
     (setq org-tags-column -90)
     (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
@@ -609,26 +679,26 @@ goto-label.
     (with-eval-after-load 'ox-latex
       (add-to-list 'org-latex-classes '("draft" "\\documentclass[11pt,draft]{book}"
     ("\\chapter{%s}" . "\\chapter*{%s}")
-  	      ("\\section{%s}" . "\\section*{%s}")
-  	      ("\\subsection{%s}" . "\\subsection*{%s}")
-  	      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-  	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
-  	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+	      ("\\section{%s}" . "\\section*{%s}")
+	      ("\\subsection{%s}" . "\\subsection*{%s}")
+	      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
       (add-to-list 'org-latex-classes '("semesternotes" "\\documentclass[11pt]{book}"
-  	      ("\\part{%s}" . "\\part*{%s}")
-  	      ("\\chapter{%s}" . "\\chapter*{%s}")
-  	      ("\\section{%s}" . "\\section*{%s}")
-  	      ("%% %s" . "%% %s")
-  	      ("%% %s" . "%% %s")
-  	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
-  	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+	      ("\\part{%s}" . "\\part*{%s}")
+	      ("\\chapter{%s}" . "\\chapter*{%s}")
+	      ("\\section{%s}" . "\\section*{%s}")
+	      ("%% %s" . "%% %s")
+	      ("%% %s" . "%% %s")
+	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
       (add-to-list 'org-latex-classes '("drill" "\\documentclass[11pt]{book}"
-  	      ("\\section{%s}" . "\\section*{%s}")
-  	      ("%% %s" . "%% %s")
-  	      ("\\begin{thm}{%s}" "\\end{thm}" "\\begin{thm}{%s}" "\\end{thm}")
-  	      ("\\begin{proof}{%s}" "\\end{proof}" "\\begin{proof}{%s}" "\\end{proof}"))))
+	      ("\\section{%s}" . "\\section*{%s}")
+	      ("%% %s" . "%% %s")
+	      ("\\begin{thm}{%s}" "\\end{thm}" "\\begin{thm}{%s}" "\\end{thm}")
+	      ("\\begin{proof}{%s}" "\\end{proof}" "\\begin{proof}{%s}" "\\end{proof}"))))
 
-  	      ;; ("\\begin{defn}{%s}" "\\end{defn}" "\\begin{defn}{%s}" "\\end{defn}")
+	      ;; ("\\begin{defn}{%s}" "\\end{defn}" "\\begin{defn}{%s}" "\\end{defn}")
     (setq org-catch-invisible-edits 'error)
     (setq org-ctrl-k-protect-subtree t)
     :bind* (("C-c C-x o" . org-clock-out)))
@@ -677,6 +747,9 @@ goto-label.
       (call-interactively 'evil-insert)))
 #+end_src
 
+#+RESULTS:
+: my-evil-org-insert-subheading
+
 #+begin_src emacs-lisp
 (use-package org-roam
       :ensure t
@@ -704,6 +777,9 @@ goto-label.
         org-roam-server-network-label-wrap-length 20))
 #+end_src
 
+#+RESULTS:
+: t
+
 **** Keybindings
 #+begin_src emacs-lisp
   (my-leader-def 'org-mode-map
@@ -711,18 +787,18 @@ goto-label.
     "T" 'org-todo
     "t" 'counsel-org-tag
     ;; "rf" 'org-refile
-    "e" 'org-export-dispatch
+    "E" 'org-export-dispatch
+    "e" 'org-edit-special
     "o" 'my-evil-org-insert-heading-after
     "O" 'my-evil-org-insert-heading-before
     "." 'my-evil-org-insert-subheading
     "p" 'org-toggle-latex-fragment
-    "m" 'my-latex-insert-inline-math
-    "M" 'my-latex-insert-display-math
     "rr" 'org-roam
     "rf" 'org-roam-find-file
     "rb" 'org-roam-switch-to-buffer
     "rg" 'org-roam-graph-show
-    "ri" 'org-roam-insert)
+    "ri" 'org-roam-insert
+    "cb" 'org-babel-execute-src-block)
 
   (general-define-key
    :states 'normal
@@ -733,6 +809,9 @@ goto-label.
    "g l" 'outline-next-visible-heading
    "g J" 'my-org-hide-current-body)
 #+end_src
+
+#+RESULTS:
+
 *** Elisp
 **** Setup
 #+BEGIN_SRC emacs-lisp
@@ -746,25 +825,28 @@ goto-label.
 
   (use-package paredit)
 #+END_SRC
+
+#+RESULTS:
+
 **** Keybindings
 #+BEGIN_SRC emacs-lisp
   (my-leader-def 'emacs-lisp-mode-map
     "e b" 'eval-buffer)
 #+END_SRC
 
+#+RESULTS:
+
 ** Documentation
 We will use helm together with helm-dash to view documentation in
 emacs.
 #+begin_src emacs-lisp
-  (use-package helm)
-  (use-package helm-dash)
-  (use-package counsel-dash)
-#+end_src
-We want documentation for my commonly used languages.
-#+begin_src emacs-lisp
   (setq helm-dash-common-docsets '("Python 2" "Haskell" ;; "Sage"
 				   "Emacs Lisp"))
 #+end_src
+
+#+RESULTS:
+| Python 2 | Haskell | Emacs Lisp |
+
 We will display the documentation in the eww web-browser in emacs.
 
 We set the font to match the rest of emacs instead of the font
@@ -805,7 +887,9 @@ possible otherwise split vertically.
     (use-package yasnippet-snippets
       :ensure t)
 #+end_src
-[]
+
+#+RESULTS:
+
 *** Hippie Expand
 #+begin_src emacs-lisp
 (global-set-key (kbd "M-/") 'hippie-expand)
@@ -842,7 +926,6 @@ possible otherwise split vertically.
         '(try-expand-dabbrev
   	try-expand-dabbrev-all-buffers
   	try-expand-dabbrev-from-kill
-	try-expand-by-dict 
   	try-complete-file-name-partially
   	try-complete-file-name
   	try-expand-all-abbrevs
@@ -851,6 +934,9 @@ possible otherwise split vertically.
   	try-complete-lisp-symbol-partially
   	try-complete-lisp-symbol))
 #+end_src
+
+#+RESULTS:
+| try-expand-dabbrev | try-expand-dabbrev-all-buffers | try-expand-dabbrev-from-kill | try-complete-file-name-partially | try-complete-file-name | try-expand-all-abbrevs | try-expand-list | try-expand-line | try-complete-lisp-symbol-partially | try-complete-lisp-symbol |
 
 ** Writing
 *** Spell-check
@@ -890,6 +976,8 @@ opens the suggestion in a pop-up menu.
   (use-package powerthesaurus)
 #+end_src
 
+#+RESULTS:
+
 *** Grammar-check
 #+begin_src emacs-lisp
   (use-package langtool
@@ -897,6 +985,10 @@ opens the suggestion in a pop-up menu.
     (setq langtool-java-bin "/usr/bin/java")
     (setq langtool-language-tool-jar "/Applications/LanguageTool-4.2/languagetool-commandline.jar"))
 #+end_src
+
+#+RESULTS:
+: t
+
 ** Project Management
 #+begin_src emacs-lisp
   (use-package magit
@@ -920,6 +1012,9 @@ opens the suggestion in a pop-up menu.
 )
 	
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Remote Work
 I have a laptop I use as a server for running
@@ -949,6 +1044,9 @@ a file in Dropbox. These functions allow easy access to that computer.
         (buffer-string)))
 #+end_src
 
+#+RESULTS:
+: get-string-from-file
+
 ** Programming
 *** Syntax
 #+BEGIN_SRC emacs-lisp
@@ -966,10 +1064,15 @@ a file in Dropbox. These functions allow easy access to that computer.
 
     (add-to-list 'flycheck-checkers 'proselint))
 #+END_SRC
+
+#+RESULTS:
+
 *** Ctags
 #+BEGIN_SRC emacs-lisp
   (use-package ctags-update)
 #+END_SRC
+
+#+RESULTS:
 
 ** Telemetry
 #+begin_src emacs-lisp
@@ -980,3 +1083,51 @@ a file in Dropbox. These functions allow easy access to that computer.
     (keyfreq-mode 1)
     (keyfreq-autosave-mode 1))
 #+end_src
+
+#+RESULTS:
+
+** Email
+#+begin_src emacs-lisp
+  (require 'mu4e)
+
+
+  (setq mail-user-agent 'mu4e-user-agent)
+
+  (setq mu4e-drafts-folder "/[Gmail].Drafts")
+  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+  (setq mu4e-trash-folder  "/[Gmail].Trash")
+
+  (setq mu4e-sent-messages-behavior 'delete)
+
+  ;; (setq mu4e-maildir-shortcuts
+  ;;   '( (:maildir "/uva/INBOX"              :key ?i)
+  ;;      (:maildir "/[Gmail].Sent Mail"  :key ?s)
+  ;;      (:maildir "/[Gmail].Trash"      :key ?t)
+  ;;      (:maildir "/[Gmail].All Mail"   :key ?a)))
+
+  (setq mu4e-get-mail-command "offlineimap")
+  (setq mu4e~get-mail-password-regexp "^Password:")
+
+  (setq mu4e-completing-read-function 'ivy-completing-read)
+  (setq mu4e-compose-format-flowed t)
+#+end_src
+
+#+RESULTS:
+: t
+
+
+*** Keybindings
+#+begin_src emacs-lisp
+    (general-define-key
+    :keymaps 'mu4e-headers-mode-map
+    "j" 'evil-next-line
+    "k" 'evil-previous-line)
+
+   (general-define-key
+    :keymaps 'mu4e-view-mode-map
+    "g" 'ace-link-mu4e)
+#+end_src
+
+#+RESULTS:
+
+
