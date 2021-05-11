@@ -1078,11 +1078,11 @@ Here we change the basic look and feel.
   (setq scroll-step 1)
 
   (global-set-key [mouse-3]
-    `(menu-item ,(purecopy "Menu Bar") ignore
-      :filter (lambda (_)
-	      (if (zerop (or (frame-parameter nil 'menu-bar-lines) 0))
-		  (mouse-menu-bar-map)
-		(mouse-menu-major-mode-map)))))
+		  `(menu-item ,(purecopy "Menu Bar") ignore
+			      :filter (lambda (_)
+					(if (zerop (or (frame-parameter nil 'menu-bar-lines) 0))
+					    (mouse-menu-bar-map)
+					  (mouse-menu-major-mode-map)))))
 
   (set-face-attribute 'default nil :height 180)
 
@@ -1090,7 +1090,8 @@ Here we change the basic look and feel.
   (tool-bar-mode -1)
 
   (use-package sublime-themes
-	     :init (progn (load-theme 'spolsky t)))
+    :init
+    (progn (load-theme 'spolsky t)))
 
   (use-package modern-fringes)
 
@@ -1100,8 +1101,9 @@ Here we change the basic look and feel.
 
   ;; make shell commands work on OS X
   (use-package exec-path-from-shell
-	     :config (when (memq window-system '(mac ns))
-		       (exec-path-from-shell-initialize)))
+    :config
+    (when (memq window-system '(mac ns))
+      (exec-path-from-shell-initialize)))
 
   (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -1111,20 +1113,20 @@ Here we change the basic look and feel.
   (global-auto-revert-mode t)
 
   (use-package smart-mode-line
-   :ensure t
-   :config
-   (setq sml/theme 'dark)
-   (setq rm-blacklist '(" Undo-Tree"
-		      " ivy"
-		      " counsel"
-		      " yas"
-		      " SP"
-		      " WK"
-		      " ElDoc"
-		      " Fly"
-		      " EvilOrg"
-		      " s-/"))
-   (add-hook 'after-init-hook 'sml/setup))
+    :ensure t
+    :config
+    (setq sml/theme 'dark)
+    (setq rm-blacklist '(" Undo-Tree"
+			 " ivy"
+			 " counsel"
+			 " yas"
+			 " SP"
+			 " WK"
+			 " ElDoc"
+			 " Fly"
+			 " EvilOrg"
+			 " s-/"))
+    (add-hook 'after-init-hook 'sml/setup))
 #+end_src
 
 #+RESULTS:
