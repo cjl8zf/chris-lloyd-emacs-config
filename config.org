@@ -242,7 +242,8 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
       (key-chord-mode 1)
       (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
       (key-chord-define evil-replace-state-map  "jk" 'evil-normal-state)
-      (key-chord-define evil-lispy-mode-map  "jk" 'evil-normal-state)
+      (key-chord-define ivy-minibuffer-map  "jk" 'keyboard-escape-quit)
+      ;; (add-hook 'evil-lispy-mode-hook '(key-chord-define evil-lispy-mode-map  "jk" 'evil-normal-state))
       (key-chord-define evil-visual-state-map  "jk" 'evil-normal-state))
 
   (use-package evil-matchit)
@@ -308,69 +309,69 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
   (use-package general)
 
   (general-define-key
-     :keymaps 'normal
-     "z =" 'mk-flyspell-correct-previous
-     "z \\" 'powerthesaurus-lookup-word-at-point
-     "z Z" 'my-horizontal-recenter
-     "g o" 'my-goto-defn-split
-     "g a" 'evil-forward-arg
-     "g A" 'evil-backward-arg
-     "<deletechar>" '(lambda () (interactive) (switch-to-buffer-other-window "*Sage*")))
+   :keymaps 'normal
+   "z =" 'mk-flyspell-correct-previous
+   "z \\" 'powerthesaurus-lookup-word-at-point
+   "z Z" 'my-horizontal-recenter
+   "g o" 'my-goto-defn-split
+   "g a" 'evil-forward-arg
+   "g A" 'evil-backward-arg
+   "<deletechar>" '(lambda () (interactive) (switch-to-buffer-other-window "*Sage*")))
 
-   (general-create-definer my-leader-def
-     :states '(normal emacs visual)
-     :keymaps '(global magit-mode-map)
-     :prefix "SPC")
+  (general-create-definer my-leader-def
+    :states '(normal emacs visual)
+    :keymaps '(global magit-mode-map)
+    :prefix "SPC")
 
-   (my-leader-def
-     "m" 'magit-status
-     "y"   'counsel-yank-pop
-     "b b" 'switch-to-buffer
-     "b o" 'switch-to-buffer-other-window
-     "b k" 'kill-current-buffer
-     "w w" 'ace-window
-     "w o" 'other-window
-     "w 1" 'delete-other-windows
-     "w k" 'delete-window
-     "w h" 'split-window-vertically
-     "w v" 'split-window-horizontally
-     "w s" 'ace-swap-window
-     "w <left>" 'shrink-window-horizontally
-     "w <right>" 'enlarge-window-horizontally
-     "w <down>" 'shrink-window
-     "w <up>" 'enlarge-window
-     "w b" 'balance-windows
-     "w u" 'winner-undo
-     "w r" 'winner-redo
-     "<SPC>" 'avy-goto-char
-     "l" 'avy-goto-line
-     "f f" 'counsel-find-file
-     "f r" 'counsel-recentf
-     "f s" 'save-buffer
-     "f S" 'write-file
-     "x" 'counsel-M-x
-     "h k" 'describe-key
-     "h f" 'describe-function
-     "h m" 'describe-mode
-     "h v" 'describe-variable
-     ":" 'eval-expression
-     "s f" 'sp-slurp-hybrid-sexp
-     "s b" 'sp-forward-barf-sexp
-     "s F" 'sp-backward-slurp-sexp
-     "s B" 'sp-backward-barf-sexp
-     "/" 'swiper-all
-     "d" 'counsel-dash-at-point
-     "D" 'counsel-dash)
+  (my-leader-def
+    "m" 'magit-status
+    "y"   'counsel-yank-pop
+    "b b" 'switch-to-buffer
+    "b k" 'kill-buffer
+    "w" (general-key-dispatch 'ace-window
+	  "w" 'ace-window
+	  "f" 'fit-window-to-buffer
+	  "<SPC>" 'delete-other-windows
+	  "k" 'delete-window
+	  "h" 'split-window-vertically
+	  "v" 'split-window-horizontally
+	  "s" 'ace-swap-window
+	  "<left>" 'shrink-window-horizontally
+	  "<right>" 'enlarge-window-horizontally
+	  "<down>" 'shrink-window
+	  "<up>" 'enlarge-window
+	  "b" 'balance-windows
+	  "u" 'winner-undo
+	  "r" 'winner-redo)
+    "<SPC>" 'avy-goto-char
+    "l" 'avy-goto-line
+    "f f" 'counsel-find-file
+    "f r" 'counsel-recentf
+    "f s" 'save-buffer
+    "f S" 'write-file
+    "x" 'counsel-M-x
+    "h k" 'describe-key
+    "h f" 'describe-function
+    "h m" 'describe-mode
+    "h v" 'describe-variable
+    ":" 'eval-expression
+    "s f" 'sp-slurp-hybrid-sexp
+    "s b" 'sp-forward-barf-sexp
+    "s F" 'sp-backward-slurp-sexp
+    "s B" 'sp-backward-barf-sexp
+    "/" 'swiper-all
+    "d" 'counsel-dash-at-point
+    "D" 'counsel-dash)
 
-   (general-define-key
-    :keymaps 'ivy-mode-map
-    "C-j" 'ivy-next-line
-    "C-k" 'ivy-previous-line)
+  (general-define-key
+   :keymaps 'ivy-mode-map
+   "C-j" 'ivy-next-line
+   "C-k" 'ivy-previous-line)
 
-   (general-define-key
-    :states '(normal emacs)
-    :keymaps '(sage-shell-mode-map gap-process-map)
-    "SPC p" 'counsel-shell-history)
+  (general-define-key
+   :states '(normal emacs)
+   :keymaps '(sage-shell-mode-map gap-process-map)
+   "SPC p" 'counsel-shell-history)
 #+end_src
 
 #+RESULTS:
@@ -378,6 +379,14 @@ tikz-diagrams, where I disabled wrapping. This function is from [[https://stacko
 *** 
 
 ** Major Modes
+*** C++
+**** Keybindings
+#+begin_src emacs-lisp
+  (my-leader-def 'c++-mode-map
+    "c" 'compile)
+#+end_src
+
+
 *** LaTeX
 **** Setup
 #+begin_src emacs-lisp
@@ -576,6 +585,16 @@ goto-label.
 #+begin_src emacs-lisp
   (my-leader-def 'sage-shell:sage-mode-map 
       "c" 'sage-shell-edit:send-buffer)
+#+end_src
+
+#+RESULTS:
+
+*** Sage
+
+**** Keybindings
+#+begin_src emacs-lisp
+  (my-leader-def 'python-mode-map 
+      "c" 'python-shell-send-buffer)
 #+end_src
 
 #+RESULTS:
@@ -818,10 +837,12 @@ goto-label.
   (use-package lispy)
   (use-package evil-lispy
       :init
-     (add-hook 'emacs-lisp-mode-hook #'evil-lispy-mode))
+     ;; (add-hook 'emacs-lisp-mode-hook #'evil-lispy-mode)
+     )
   (use-package lispyville
       :init
-      (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
+	(add-hook 'lispy-mode-hook #'lispyville-mode))
+      ;; (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
 
   (use-package paredit)
 #+END_SRC
@@ -840,12 +861,9 @@ goto-label.
 We will use helm together with helm-dash to view documentation in
 emacs.
 #+begin_src emacs-lisp
-  (setq helm-dash-common-docsets '("Python 2" "Haskell" ;; "Sage"
-				   "Emacs Lisp"))
+  (setq helm-dash-common-docsets '("Python 2" "Haskell" "Sage" "Emacs Lisp"))
 #+end_src
 
-#+RESULTS:
-| Python 2 | Haskell | Emacs Lisp |
 
 We will display the documentation in the eww web-browser in emacs.
 
@@ -853,20 +871,20 @@ We set the font to match the rest of emacs instead of the font
 provided from html. We also force the browser to pop up on the left if
 possible otherwise split vertically.
 #+begin_src emacs-lisp
-  (setq helm-dash-browser-func 'eww-browse-url)
+  (setq counsel-dash-browser-func 'eww-browse-url)
 
   (add-hook 'eww-mode-hook 'eww-toggle-fonts)
 
   (defun eww-display+ (buf _alist)
     (let ((w (or
-  	       (window-in-direction 'left)
-  	       (split-window-vertically))))
+	       (window-in-direction 'left)
+	       (split-window-vertically))))
       (set-window-buffer w buf)
       w))
 
   (push `(,(rx "*eww*")
-  	(eww-display+))
-        display-buffer-alist)
+	(eww-display+))
+	display-buffer-alist)
 #+end_src
 
 ** Completions
@@ -983,7 +1001,17 @@ opens the suggestion in a pop-up menu.
   (use-package langtool
     :config
     (setq langtool-java-bin "/usr/bin/java")
-    (setq langtool-language-tool-jar "/Applications/LanguageTool-4.2/languagetool-commandline.jar"))
+    (setq langtool-language-tool-jar "/Applications/LanguageTool/languagetool-commandline.jar"))
+#+end_src
+I wrote a package called [[https://github.com/cjl8zf/langtool-ignore-fonts][langtool-ignore-fonts]] that extends the
+langtool package to ignore specified fonts. I use this to ignore the
+LaTeX markup when checking syntax. 
+#+begin_src emacs-lisp
+(use-package langtool-ignore-fonts
+  :load-path "~/.emacs.d/elpa/"
+  :config 
+  (add-hook 'markdown-mode-hook (lambda () 
+				  (setq-local langtool-ignore-fonts '(markdown-code-face))))
 #+end_src
 
 #+RESULTS:
@@ -998,19 +1026,23 @@ opens the suggestion in a pop-up menu.
   (use-package skeletor
       :config
       (skeletor-define-template "latex-skeleton"
-        :title "latex-skeleton"
-        :no-license? t)
+	:title "latex-skeleton"
+	:no-license? t)
       (skeletor-define-template "beamer-skeleton"
-        :title "beamer-skeleton"
-        :no-license? t)
+	:title "beamer-skeleton"
+	:no-license? t)
       (skeletor-define-template "classwork-skeleton"
-        :title "classwork-skeleton"
-        :no-license? t)
+	:title "classwork-skeleton"
+	:no-license? t)
       (skeletor-define-template "coverletter-skeleton"
-        :title "coverletter-skeleton"
-        :no-license? t)
-)
-	
+	:title "coverletter-skeleton"
+	:no-license? t)
+      (skeletor-define-template "resume-skeleton"
+	  :title "resume-skeleton"
+	  :no-license? t)
+    (skeletor-define-template "c++-skeleton"
+      :title "c++-skeleton"
+      :no-license? t))
 #+end_src
 
 #+RESULTS:
@@ -1023,30 +1055,26 @@ a file in Dropbox. These functions allow easy access to that computer.
 #+begin_src emacs-lisp
   (use-package ssh)
 
-    (defun connect-lenovo ()
-      "Open dired into lenovo"
-      (interactive)
-      (dired (concat "/ssh:chris@" (lenovo-ip) ":/home/")))
+  (defun connect-lenovo ()
+    "Open dired into lenovo"
+    (interactive)
+    (dired (concat "/ssh:chris@" (lenovo-ip) ":/home/")))
 
-    (defun ssh-lenovo ()
-      "SSH into lenovo."
-      (interactive)
-      (ssh (concat "chris@" (lenovo-ip))))
+  (defun ssh-lenovo ()
+    "SSH into lenovo."
+    (interactive)
+    (ssh (concat "chris@" (lenovo-ip))))
 
-    (defun lenovo-ip ()
-        "Return ip for lenovo."
-        (substring (get-string-from-file "~/DropBox/lenovo_ip.txt") 0 -1))
+  (defun lenovo-ip ()
+    "Return ip for lenovo."
+    (substring (get-string-from-file "~/DropBox/lenovo_ip.txt") 0 -1))
 
-    (defun get-string-from-file (filePath)
-      "Return filePath's file content."
-      (with-temp-buffer
-        (insert-file-contents filePath)
-        (buffer-string)))
+  (defun get-string-from-file (filePath)
+    "Return filePath's file content."
+    (with-temp-buffer
+      (insert-file-contents filePath)
+      (buffer-string)))
 #+end_src
-
-#+RESULTS:
-: get-string-from-file
-
 ** Programming
 *** Syntax
 #+BEGIN_SRC emacs-lisp
