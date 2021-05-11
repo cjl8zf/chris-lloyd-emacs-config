@@ -548,6 +548,12 @@ goto-label.
     (add-hook 'TeX-after-compilation-finished-functions
         #'TeX-revert-document-buffer))
 #+end_src
+I wrote a small package called [[https://github.com/cjl8zf/evil-pdf-tools][evil-pdf-tools]] that adds vim style key
+bindings for navigating pdfs and also simulates the vim search for
+pdfs.
+#+begin_src emacs-lisp
+(require 'evil-pdf-tools "~/.emacs.d/evil-pdf-tools-0.0.1.el")
+#+end_src
 
 #+RESULTS:
 : t
