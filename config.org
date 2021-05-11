@@ -935,6 +935,7 @@ LaTeX markup when checking syntax.
 #+begin_src emacs-lisp
   (use-package skeletor
     :config
+    (setq skeletor-user-directory "/Users/chris/project-skeletons")
     (skeletor-define-template "latex-skeleton"
       :title "latex-skeleton"
       :no-license? t)
@@ -954,6 +955,9 @@ LaTeX markup when checking syntax.
       :title "c++-skeleton"
       :no-license? t))
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Remote Work
 I have a laptop I use as a server for running
