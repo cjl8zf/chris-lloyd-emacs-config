@@ -1011,7 +1011,7 @@ LaTeX markup when checking syntax.
   :load-path "~/.emacs.d/elpa/"
   :config 
   (add-hook 'markdown-mode-hook (lambda () 
-				  (setq-local langtool-ignore-fonts '(markdown-code-face))))
+				  (setq-local langtool-ignore-fonts '(markdown-code-face)))))
 #+end_src
 
 #+RESULTS:
@@ -1075,6 +1075,7 @@ a file in Dropbox. These functions allow easy access to that computer.
       (insert-file-contents filePath)
       (buffer-string)))
 #+end_src
+
 ** Programming
 *** Syntax
 #+BEGIN_SRC emacs-lisp
